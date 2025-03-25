@@ -5,14 +5,26 @@ import (
 	"errors"
 	"regexp"
 	"strings"
+	"unicode"
 )
 
 var (
-	ErrInvalidUsername    = errors.New("username must be 3-20 characters and alphanumeric")
-	ErrInvalidPhoneNumber = errors.New("phone number must be 10 digits")
-	ErrInvalidPanCard     = errors.New("PAN card must be 10 characters (e.g., ABCDE1234F)")
-	ErrInvalidEmail       = errors.New("invalid email format")
-	ErrInvalidPassword    = errors.New("password must be at least 8 characters")
+	ErrInvalidUsernameLength          = errors.New("username must be between 3 and 20 characters")
+	ErrNoCapitalStart                 = errors.New("username must start with a capital letter")
+	ErrContainsSpaces                 = errors.New("username cannot contain spaces")
+	ErrInvalidCharacters              = errors.New("username can only contain letters and numbers")
+	ErrEmptyUsername                  = errors.New("username cannot be empty")
+	ErrEmptyPhoneNumber               = errors.New("phone number cannot be empty")
+	ErrInvalidPhoneNumberLength       = errors.New("phone number must be between 10 and 15 digits (including country code)")
+	ErrNoCountryCode                  = errors.New("phone number must start with a country code (e.g., +1, +91)")
+	ErrInvalidCharactersofphonenumber = errors.New("phone number can only contain digits, +, and optional spaces or hyphens")
+	ErrTooManySeparators              = errors.New("phone number cannot have more than 2 separators (spaces or hyphens)")
+	ErrEmptyEmail                     = errors.New("email cannot be empty")
+	ErrInvalidEmail                   = errors.New("invalid email format")
+	ErrNoAtSymbol                     = errors.New("email must contain exactly one @ symbol")
+	ErrMultipleAtSymbols              = errors.New("email cannot contain multiple @ symbols")
+	ErrInvalidPassword                = errors.New("password must be at least 8 characters")
+	ErrInvalidPanCard                 = errors.New("PAN card must be 10 characters (e.g., ABCDE1234F)")
 )
 
 func ValidateUser(User *models.User) error {
@@ -35,11 +47,25 @@ func ValidateUser(User *models.User) error {
 }
 
 func ValidateUsername(username string) error {
-	if len(username) < 3 || len(username) > 20 {
-		return ErrInvalidUsername
+
+	if username == "" {
+		return ErrEmptyUsername
 	}
+
+	if len(username) < 3 || len(username) > 20 {
+		return ErrInvalidUsernameLength
+	}
+
+	if !unicode.IsUpper(rune(username[0])) {
+		return ErrNoCapitalStart
+	}
+
+	if regexp.MustCompile(`\s`).MatchString(username) {
+		return ErrContainsSpaces
+	}
+
 	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9]+$`, username); !matched {
-		return ErrInvalidUsername
+		return ErrInvalidCharacters
 	}
 	return nil
 }
@@ -53,6 +79,23 @@ func ValidatePassword(password string) error {
 
 func ValidateEmail(email string) error {
 	email = strings.TrimSpace(email)
+	if email == "" {
+		return ErrEmptyEmail
+	}
+
+	if strings.Contains(email, " ") {
+		return ErrContainsSpaces
+	}
+
+	atCount := strings.Count(email, "@")
+	if atCount == 0 {
+		return ErrNoAtSymbol
+	}
+	if atCount > 1 {
+		return ErrMultipleAtSymbols
+	}
+
+	email = strings.TrimSpace(email)
 	if matched, _ := regexp.MatchString(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`, email); !matched {
 		return ErrInvalidEmail
 	}
@@ -61,9 +104,36 @@ func ValidateEmail(email string) error {
 
 func ValidatePhoneNumber(phone string) error {
 	phone = strings.TrimSpace(phone)
-	if matched, _ := regexp.MatchString(`^[0-9]{10}$`, phone); !matched {
-		return ErrInvalidPhoneNumber
+	if phone == "" {
+		return ErrEmptyPhoneNumber
 	}
+
+	if !strings.HasPrefix(phone, "+") {
+		return ErrNoCountryCode
+	}
+
+	digitCount := 0
+	separatorCount := 0
+	for _, r := range phone {
+		if unicode.IsDigit(r) {
+			digitCount++
+		} else if r == ' ' || r == '-' {
+			separatorCount++
+		}
+	}
+
+	if digitCount < 10 || digitCount > 15 {
+		return ErrInvalidPhoneNumberLength
+	}
+
+	if separatorCount > 2 {
+		return ErrTooManySeparators
+	}
+
+	if matched, _ := regexp.MatchString(`^\+[0-9]+([ -]?[0-9]+)*$`, phone); !matched {
+		return ErrInvalidCharactersofphonenumber
+	}
+
 	return nil
 }
 
