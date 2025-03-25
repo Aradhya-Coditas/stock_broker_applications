@@ -1,11 +1,8 @@
 package main
 
 import (
-	"authentication/handlers"
 	"authentication/models"
-	"authentication/repo"
 	"authentication/router"
-	"authentication/service"
 	"authentication/utils"
 	"authentication/utils/db"
 	"log"
@@ -21,14 +18,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
-	dbInstance.AutoMigrate(&models.User{})
+	if err := dbInstance.AutoMigrate(&models.User{}); err != nil {
+		log.Fatal(err)
+	}
 
-	repoInstance := &repo.SignUpRepository{DB: dbInstance}
-	serviceInstance := &service.SignUpService{Repo: repoInstance}
-	handlerInstance := &handlers.SignUpHandler{Service: serviceInstance}
+	routerInstance := router.SetupRouter(dbInstance)
 
-	routerInstance := router.SetupRouter(handlerInstance)
 	log.Printf("Server starting on port %s", "8080")
-	log.Fatal(routerInstance.Run(":" + "8080"))
+	if err := routerInstance.Run(":" + "8080"); err != nil {
+		log.Fatal("Failed to start server: ", err)
+	}
 }
