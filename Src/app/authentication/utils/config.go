@@ -28,17 +28,6 @@ func LoadConfig() (*Config, error) {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./resources")
 
-	// viper.config := &Config{}
-	// file, err := os.ReadFile("./resources/applications.yml")
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = yaml.Unmarshal(file, config)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// fmt.Println("Hello", config.Database.Username)
-	// return config, nil
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, fmt.Errorf("failed to read config file: %v", err)
@@ -46,12 +35,10 @@ func LoadConfig() (*Config, error) {
 
 	config := &Config{}
 
-	// Unmarshal the config into the struct
 	if err := viper.Unmarshal(config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %v", err)
 	}
 
-	// Print for debugging (optional)
 	fmt.Println("Database Username:", config.Database.Username)
 
 	return config, nil

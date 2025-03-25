@@ -22,14 +22,3 @@ func (s *SignUpService) SignUp(User *models.User) (string, error) {
 	}
 	return "register successfully", nil
 }
-
-func (s *SignUpService) SignIn(username, password string) (string, error) {
-	user, err := s.Repo.FindUserByUsername(username)
-	if err != nil {
-		return "", nil
-	}
-	if user.Password != password {
-		return "Invalid Password", nil
-	}
-	return "logged in successfully", nil
-}

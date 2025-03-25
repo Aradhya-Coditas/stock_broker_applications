@@ -26,28 +26,3 @@ func (h *SignUpHandler) SignUp(c *gin.Context) {
 
 	c.JSON(200, gin.H{"message": msg})
 }
-
-func (h *SignUpHandler) SignIn(c *gin.Context) {
-	var creds struct {
-		UserName string `json:"username"`
-		Password string `json:"password"`
-	}
-
-	if err := c.ShouldBindJSON(&creds); err != nil {
-		c.JSON(400, gin.H{"error": "Invalid request"})
-		return
-	}
-
-	msg, err := h.Service.SignIn(creds.UserName, creds.Password)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	if msg == "invalid password" {
-		c.JSON(200, gin.H{"error": msg})
-		return
-	}
-
-	c.JSON(200, gin.H{"message": msg})
-}
