@@ -14,12 +14,7 @@ type DBConfig struct {
 	DBName   string `yaml:"dbname"`
 }
 
-// type ServerConfig struct {
-// 	Localhost string `yaml:"localhost"`
-//}
-
 type Config struct {
-	// Server   ServerConfig `yaml:"server"`
 	Database DBConfig `yaml:"database"`
 }
 
@@ -27,7 +22,6 @@ func LoadConfig() (*Config, error) {
 	viper.SetConfigName("applications")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./resources")
-
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, fmt.Errorf("failed to read config file: %v", err)
@@ -39,7 +33,6 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal config: %v", err)
 	}
 
-	fmt.Println("Database Username:", config.Database.Username)
 
 	return config, nil
 }

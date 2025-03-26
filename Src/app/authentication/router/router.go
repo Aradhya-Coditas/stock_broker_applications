@@ -15,10 +15,14 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	serviceInstance := &service.SignUpService{Repo: repoInstance}
 	handlerInstance := &handlers.SignUpHandler{Service: serviceInstance}
 
+	repoInstanceSignin := &repo.SignInRepository{DB: db}
+	serviceInstanceSignin:= &service.SignInService{Repo: repoInstanceSignin}
+	handlerInstanceSignin:=&handlers.SignInHandler{Service: serviceInstanceSignin}
+
 	r := gin.Default()
 
 	r.POST(constants.SignUpRoute, handlerInstance.SignUp)
-	// r.POST(constants.SignInRoute, handlerInstance.SignIn)
+	r.POST(constants.SignInRoute, handlerInstanceSignin.SignIn)
 
 	return r
 }

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"authentication/models"
 	"authentication/utils/db"
 	"log"
+	"stock_broker_applications/src/models"
 )
 
 func main() {

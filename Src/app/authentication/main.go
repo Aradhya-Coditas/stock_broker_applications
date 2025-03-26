@@ -25,7 +25,8 @@ func main() {
 	routerInstance := router.SetupRouter(dbInstance)
 
 	log.Printf("Server starting on port %s", "8080")
-	if err := routerInstance.Run(":" + "8080"); err != nil {
+	if err := routerInstance.Run(":" + "8080"); 
+	err != nil {
 		log.Fatal("Failed to start server: ", err)
 	}
 }
